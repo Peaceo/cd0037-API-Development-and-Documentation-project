@@ -33,7 +33,7 @@ createbd trivia
 Populate the database using the `trivia.psql` file provided. From the `backend` folder in terminal run:
 
 ```bash
-psql trivia < trivia.psql
+
 ```
 
 ### Run the Server
@@ -89,6 +89,108 @@ You will need to provide detailed documentation of your API endpoints including 
   "6": "Sports"
 }
 ```
+
+## API endpoint documentation
+`GET '/categories'`
+* Returns all the categories
+* URI:- http://127.0.0.1:5000/categories
+* Response
+  ```json
+  {
+          "categories": {
+          "1": "history",
+          "2": "science",
+          "3" : "Geography",
+          "4" : "History",
+          "5" : "Entertainment",
+          "6" : "Sports"
+          },
+      "success": true
+          }```
+`GET '/questions'`
+* Returns all the question
+* URI:- http://127.0.0.1:5000/questions
+* Response
+  ```js
+    {
+    'questions': [
+        {
+            'id': 1,
+            'question': 'This is a question',
+            'answer': 'This is an answer',
+            'difficulty': 5,
+            'category': 2
+        },
+    ],
+    'totalQuestions': 100,
+    'categories': { '1' : "Science",
+    '2' : "Art",
+    '3' : "Geography",
+    '4' : "History",
+    '5' : "Entertainment",
+    '6' : "Sports" },
+    'currentCategory': 'History'
+}```
+
+
+`DELETE '//questions/<int:question_id>'`
+* Deletes question with given ID
+* URI:- http://127.0.0.1:5000//questions/4>
+* Response
+   ```json
+   {
+              "id": 4,
+              "message": "Question deleted successfully ",
+              "success": true
+          }```
+
+`POST '/questions'`
+*  Inserting a new question.
+* URI:- http://127.0.0.1:5000/questions
+* Response
+  ``` JSON file format
+      * {
+          "answer": "blue",
+          "category": "2",
+          "difficulty": 1,    
+          "id": 10,
+          "question": "What is the colour of sky"
+          }
+  * Response
+      json {          
+          "success": True,
+          "created": question.id, 
+                  
+       }```
+
+`POST '/questions/search'`
+* Returns questions based on search terms
+* URI:- http://127.0.0.1:5000//questions/search
+* Response
+  ```json{          
+    "success":True,
+    "count":count,
+    "data":data
+          }```
+
+`GET '/categories/<int:category_id>/questions'`
+* Returns questions in a required category
+* URI:- http://127.0.0.1:5000//categories/4/questions
+* Response
+  ```json
+  {
+          "categories": {
+          "questions":"categories_questions"
+          },
+      
+          }```
+`GET '/quizzes'`
+* Returns all the categories
+* URI:- http://127.0.0.1:5000/quizzes
+* Response
+  ```json
+  {
+          }```
 
 ## Testing
 
