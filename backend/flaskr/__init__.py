@@ -15,8 +15,7 @@ QUESTIONS_PER_PAGE = 10
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)    
-    # CORS(app=app, resources={ methods=['']  })
-    # app.config['CORS_HEADERS'] = 'Content-Type'
+    
     setup_db(app)
 
     """
@@ -278,60 +277,6 @@ def create_app(test_config=None):
             })
         except:
             abort(404)  
-
-
-    """    
-    @TODO:
-    Create a POST endpoint to get questions to play the quiz.
-    This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
-    if provided, and that is not one of the previous questions.
-
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
-    and shown whether they were correct or not.
-    """    
-    
-    ''' @app.route ('/quizzes', methods=['POST'])
-    def play_quiz():
-        question = Question.query.all()
-        category = Category.query.all()
-        body = request.get_json()
-        try: '''
-
-    @app.route ('/quizzes', methods=['POST'])
-    def play_quiz():
-        try:
-            body = request.get_json()
-            category_id = int(body["quiz_category"]["id"])
-            category = Category.query.get(category_id)
-            previous_questions = body.get('previous_questions')
-
-            if not category == None:
-                if "previous_questions" in body and len(previous_questions) > 0:
-                    questions = Question.query.filter(
-                    Question.id.notin_(previous_questions),
-                    Question.category == category.id
-                    ).all()
-                else:
-                    questions = Question.query.filter(Question.category == category.id).all()
-            else:
-                if "previous_questions" in body and len(previous_questions) > 0:
-                    questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
-                else:
-                    questions = Question.query.all()
-            max = len(questions) -1
-            if max > 0:
-                question = questions[random.randint(0, max)].format()
-            else:
-                question = False
-
-            return jsonify({
-                "success": True,
-                "question": question
-            })
-        except:
-            abort(500, "Error loading question")
             
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
     """
