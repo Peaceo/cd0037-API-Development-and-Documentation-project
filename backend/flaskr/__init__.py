@@ -1,28 +1,29 @@
-
 import os
 from pickle import APPEND
 from unicodedata import category
+from webbrowser import get
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 import random
 from models import setup_db, Question, Category
+from importlib import reload
+
+
+
 
 
 QUESTIONS_PER_PAGE = 10
 # app = Flask(__name__)
-
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__)    
-    
+    app = Flask(__name__) 
     setup_db(app)
 
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
     CORS(app, resources={r"/api/*": {"origins": "*"}})
-
     # CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:5000/"}})
     # CORS(app)
 
@@ -40,16 +41,6 @@ def create_app(test_config=None):
 
         return response '''
     
-    def paginate_questions(request, selection):
-        page = request.args.get('page', 1, type=int)
-        start = (page - 1) * QUESTIONS_PER_PAGE
-        end = start + QUESTIONS_PER_PAGE
-
-        questions = [question.format() for question in selection]
-        current_questions = questions[start:end]
-
-        return current_questions
-    
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Origin',"http://localhost:3000")
@@ -65,8 +56,15 @@ def create_app(test_config=None):
 
         return response
 
-    """
+    def paginate_questions(request, selection):
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * QUESTIONS_PER_PAGE
+        end = start + QUESTIONS_PER_PAGE
+        questions = [question.format() for question in selection]
+        current_questions = questions[start:end]
+        return current_questions
 
+    """
     @TODO:
     Create an endpoint to handle GET requests
     for all available categories.
@@ -96,32 +94,34 @@ def create_app(test_config=None):
     """
     @app.route('/questions', methods=['GET'])
     def question():
-        # Implement pagination
-        page = request.args.get('page', 1, type=int)
-        start = (page - 1) * 10
-        end = start + 10
-        
         # db query
         questions = Question.query.all()
         categories = Category.query.all()
         length = len(questions)
-        
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * 10
+        try:
+        # Implement pagination
+            end = start + 10   
+            formatted_questions = [question.format() for question in questions]
+            formatted_categories = {}
+            for category in categories:
+                formatted_categories[f'{category.id}'] = category.type
+                
+            
+            return jsonify({
+                
+                'questions': formatted_questions[start:end],
+                'totalQuestions':length,
+                'categories': formatted_categories,
+                'currentCategory': category.type,
+                'success': True            
+            })
+        except:
+            abort(404)
 
-        formatted_questions = [question.format() for question in questions]
-        formatted_categories = {}
-        for category in categories:
-            formatted_categories[f'{category.id}'] = category.type
         
-        return jsonify({
-            
-            'questions': formatted_questions[start:end],
-            'totalQuestions':length,
-            'categories': formatted_categories,
-            'currentCategory': category.type
-            
-        })        
-        
-    ''' 
+        ''' 
             for question in questions:
                 data = {
                 'questions':{
@@ -147,7 +147,7 @@ def create_app(test_config=None):
     """
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
-        # try:
+        try:
             unique_question = Question.query.filter_by(id=question_id).first()
 
             if unique_question is None:
@@ -158,15 +158,11 @@ def create_app(test_config=None):
             # current_question = paginate_questions(request, selection)
 
             return jsonify({
-            'success': 'True',
+            'success': True,
             'deleted question': 'Question deleted successfully', 
             })
-
-        # except Exception as e:
-        #     return jsonify({
-        #     'success': True,
-        #     'deleted question': unique_question, 
-        #     })
+        except:
+            abort(404)
 
 
     """
@@ -179,23 +175,17 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
-    #function to paginate questions
+
     @app.route('/questions', methods = ['POST'])
     # @cross_origin(headers=['access-control-allow-origin', 'Content-Type'])
-    def post_new_question():
-        
+    def post_new_question():        
         body = request.get_json()
-
-        question = body.get('question', None)
-        new_answer = body.get('answer', None)
-        new_category = body.get('category', None)
-        new_difficulty_score = body.get('difficulty', None)
-        
-        ''' new_question = body.get("question", None)
-        new_answer = body.get("answer", None)
-        new_category = body.get("category", None)
-        new_difficulty_score = body.get("difficulty", None) '''
         try:
+            question = body.get('question', None)
+            new_answer = body.get('answer', None)
+            new_category = body.get('category', None)
+            new_difficulty_score = body.get('difficulty', None)
+
             question = Question(question, new_answer, new_category, new_difficulty_score)
             question.insert()
 
@@ -222,12 +212,11 @@ def create_app(test_config=None):
     # @cross_origin(origins='*')
     def search_questions(search):
         # search = request.form.get('search_term')
-        search_questions = Question.query.filter(Question.question.ilike(f'%{search}%')).all()
-        data = paginate_questions(request, search_questions)
-        count = len(search_questions)
         try:
+            search_questions = Question.query.filter(Question.question.ilike(f'%{search}%')).all()
+            data = paginate_questions(request, search_questions)
+            count = len(search_questions)
             # data = []
-        
             # for search in search_questions:
             #     data.append({
             #         "id":search.id,
@@ -263,6 +252,7 @@ def create_app(test_config=None):
     def get_questions_by_categories(category_id):
         try:
             categories_questions = Question.query.filter(Question.category.ilike(f'{category_id}')).order_by(Question.id).all()
+            questions = questions.query.filter(questions.name.ilike('%' + request.form['search_term'] + '%')).all()
             current_question = paginate_questions(request, categories_questions)
             print(current_question)
 
@@ -277,6 +267,41 @@ def create_app(test_config=None):
             })
         except:
             abort(404)  
+
+    '''
+    @TODO:
+    Create a POST endpoint to get questions to play the quiz.
+    This endpoint should take category and previous question parameters
+    and return a random questions within the given category,
+    if provided, and that is not one of the previous questions.
+
+    TEST: In the "Play" tab, after a user selects "All" or a category,
+    one question at a time is displayed, the user is allowed to answer
+    and shown whether they were correct or not.
+    '''
+    @app.route('/quizzes', methods=['POST'])
+    def play_quiz():
+        body = request.get_json()
+
+        quiz_cat = body.get('category', None)
+        previous_ques = body.get('previous_question', None)
+
+        selection = Question.query.filter(Question.category == quiz_cat).order_by(Question.id).all()
+        current_question = paginate_questions(request, selection)
+
+        if len(current_question) == 0:
+            abort(404)
+
+        question_chosen = random.choice([ques for ques in current_question if ques.get("id") not in previous_ques])
+        previous_ques.append(question_chosen.get("id"))
+
+        return jsonify({
+            "success":True,
+            "questions":question_chosen,
+            "Previous Question":previous_ques,
+            "quiz Category":quiz_cat
+        })
+
             
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
     """
