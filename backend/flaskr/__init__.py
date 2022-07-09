@@ -293,15 +293,15 @@ def create_app(test_config=None):
 
         play_question = []
 
-        for item in questions:
-            if len(previous_questions) == 0 and item.category != int(
+        for ques in questions:
+            if len(previous_questions) == 0 and ques.category != int(
                 quiz_category["id"]
             ):
-                play_question.append(item.format())
+                play_question.append(ques.format())
             else:
-                for item_ in previous_questions:
-                    if item_ != item.id and item.category != int(quiz_category["id"]):
-                        play_question.append(item.format())
+                for ques_ in previous_questions:
+                    if ques_ != ques.id and ques.category != int(quiz_category["id"]):
+                        play_question.append(ques.format())
 
         return jsonify({"question": random.choice(play_question)})
 
