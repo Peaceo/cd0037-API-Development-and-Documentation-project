@@ -47,3 +47,295 @@ Pay special attention to what data the frontend is expecting from each API respo
 By making notes ahead of time, you will practice the core skill of being able to read and understand code and will have a simple plan to follow to build out the endpoints of your backend API.
 
 > View the [Frontend README](./frontend/README.md) for more details.
+
+<!-- # API REFERENCE : TRIVIA API
+## Getting Started
+Base URL: The backend is hosted on http://127.0.0.1:5000/, it is set as a proxy in the frontend configuration.
+
+## Error Handling
+Errors are returned as JSON objects in the following format:
+
+{
+    "success": False, 
+    "error": 400,
+    "message": "bad request"
+}
+The API will return three error types when requests fail:
+
+400: Bad Request
+404: Resource Not Found
+422: Not Processable
+
+# Endpoints
+## GET /categories
+General: Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+
+Request Arguments: None
+
+Returns: An object with a single key, categories, that contains an object of id: category_string key: value pairs.
+
+Sample: curl http://127.0.0.1:5000/categories
+
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }
+}
+GET '/questions?page=${integer}'
+General: Fetches a paginated set of questions, a total number of questions, all categories and current category string.
+
+Request Arguments: page - integer
+
+Returns: An object with 10 paginated questions, total questions, object including all categories, and current category string
+
+Sample : curl http://127.0.0.1:5000/questions?page=1
+
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "currentCategory": "History", 
+  "questions": [
+    {
+      "answer": "Maya Angelou", 
+      "category": "4", 
+      "difficulty": 2, 
+      "id": 5, 
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }, 
+    {
+      "answer": "Muhammad Ali", 
+      "category": "4", 
+      "difficulty": 1, 
+      "id": 9, 
+      "question": "What boxer's original name is Cassius Clay?"
+    }, 
+    {
+      "answer": "Apollo 13", 
+      "category": "5", 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    {
+      "answer": "Tom Cruise", 
+      "category": "5", 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }, 
+    {
+      "answer": "Edward Scissorhands", 
+      "category": "5", 
+      "difficulty": 3, 
+      "id": 6, 
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    }, 
+    {
+      "answer": "Brazil", 
+      "category": "6", 
+      "difficulty": 3, 
+      "id": 10, 
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    }, 
+    {
+      "answer": "George Washington Carver", 
+      "category": "4", 
+      "difficulty": 2, 
+      "id": 12, 
+      "question": "Who invented Peanut Butter?"
+    }, 
+    {
+      "answer": "Lake Victoria", 
+      "category": "3", 
+      "difficulty": 2, 
+      "id": 13, 
+      "question": "What is the largest lake in Africa?"
+    }, 
+    {
+      "answer": "The Palace of Versailles", 
+      "category": "3", 
+      "difficulty": 3, 
+      "id": 14, 
+      "question": "In which royal palace would you find the Hall of Mirrors?"
+    }, 
+    {
+      "answer": "Agra", 
+      "category": "3", 
+      "difficulty": 2, 
+      "id": 15, 
+      "question": "The Taj Mahal is located in which Indian city?"
+    }
+  ], 
+  "totalQuestions": 34
+}
+
+GET '/categories/{id}/questions'
+Fetches questions for a cateogry specified by id request argument
+
+Request Arguments: id - integer
+
+Returns: An object with questions for the specified category, total questions, and current category string
+-Sample : curl http://127.0.0.1:5000/categories/1/questions
+
+{
+"currentCategory": "History", 
+"questions": [
+  {
+    "answer": "The Liver", 
+    "category": "1", 
+    "difficulty": 4, 
+    "id": 20, 
+    "question": "What is the heaviest organ in the human body?"
+  }, 
+  {
+    "answer": "Alexander Fleming", 
+    "category": "1", 
+    "difficulty": 3, 
+    "id": 21, 
+    "question": "Who discovered penicillin?"
+  }, 
+  {
+    "answer": "Blood", 
+    "category": "1", 
+    "difficulty": 4, 
+    "id": 22, 
+    "question": "Hematology is a branch of medicine involving the study of what?"
+  }, 
+  {
+    "answer": "rain", 
+    "category": "1", 
+    "difficulty": 2, 
+    "id": 30, 
+    "question": "What is one thing that comes down but never goes up?"
+  }
+], 
+"totalQuestions": 4
+}
+
+DELETE '/questions/{id}'
+Deletes a specified question using the id of the question
+
+Request Arguments: id - integer
+
+Returns: Returns HTTP the status of the delete operation and the id of the question.
+
+Sample : curl -X DELETE http://127.0.0.1:5000/questions/27
+{
+        "success": True,
+         "deleted": 27,
+}
+POST '/quizzes'
+General:
+Sends a post request in order to get the next question
+
+Request Body:
+
+Returns: a single new question object
+
+-Sample : curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d ' {'previous_questions': [1, 4, 20, 15] quiz_category': 'History' }'
+
+Request Body:
+
+{
+  'previous_questions': [1, 4, 20, 15]
+  quiz_category': 'current category'
+}
+Response :
+
+{
+    'question': {
+        'id': 1,
+        'question': 'What is the capital of Ghana',
+        'answer': 'Accra',
+        'difficulty': 4,
+        'category': 3
+    }
+}
+POST '/questions'
+-General: Sends a post request in order to add a new question
+
+Returns: Does not return any new data
+
+Sample :
+
+curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{ 'question': 'What is the capital of Nigeria', 'answer': 'Accra', 'difficulty': 4, 'category': 3, }'
+
+POST '/questions'
+General : Sends a post request in order to search for a specific question by search term
+
+Returns: any array of questions, a number of totalQuestions that met the search term and the current category string
+
+curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{ 'searchTerm': 'Wh' }'
+
+{
+"questions": [
+    {
+      "answer": "Maya Angelou", 
+      "category": "4", 
+      "difficulty": 2, 
+      "id": 5, 
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }, 
+    {
+      "answer": "Muhammad Ali", 
+      "category": "4", 
+      "difficulty": 1, 
+      "id": 9, 
+      "question": "What boxer's original name is Cassius Clay?"
+    }, 
+    {
+      "answer": "Apollo 13", 
+      "category": "5", 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    {
+      "answer": "Tom Cruise", 
+      "category": "5", 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }, 
+    {
+      "answer": "Edward Scissorhands", 
+      "category": "5", 
+      "difficulty": 3, 
+      "id": 6, 
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    }, 
+    {
+      "answer": "Brazil", 
+      "category": "6", 
+      "difficulty": 3, 
+      "id": 10, 
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    }, 
+    {
+      "answer": "George Washington Carver", 
+      "category": "4", 
+      "difficulty": 2, 
+      "id": 12, 
+      "question": "Who invented Peanut Butter?"
+    }, 
+    {
+      "answer": "Lake Victoria", 
+      "category": "3", 
+      "difficulty": 2, 
+      "id": 13, 
+      "question": "What is the largest lake in Africa?"
+    }
+],
+ "totalQuestions": 34,
+ 'currentCategory': 'Entertainment'
+} -->

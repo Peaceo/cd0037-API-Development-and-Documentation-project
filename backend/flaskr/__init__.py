@@ -188,7 +188,7 @@ def create_app(test_config=None):
 
             question = Question(question=question, answer=new_answer, category=new_category, difficulty=new_difficulty_score)
             question.insert()
-            db.session.close()
+            
 
             return jsonify({
                     "success": True,
@@ -209,10 +209,11 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route('/questions/<string:search_term>', methods=['POST'])
+    @app.route('/questions/search', methods=['POST'])
     # @cross_origin(origins='*')
-    def search_questions(search_term):
+    def search_questions():
         # search = request.form.get('search_term')
+        search_term = request.json.get('searchTerm')
         try:
             search_questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
             data = paginate_questions(request, search_questions)
@@ -231,7 +232,7 @@ def create_app(test_config=None):
                     
                     "success":True,
                     "count":count,
-                    "data":data
+                    "questions":data
 
                 })
             # response.headers.add("Access-Control-Allow-Origin", "*")
